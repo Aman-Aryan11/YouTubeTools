@@ -96,7 +96,9 @@
     <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">High Quality Thumbnail (1280x720)</h2>
     <div class="flex justify-end mb-4">
       <button type="button"
-              onclick="downloadImage('[[${thumbnailUrl}]]', 'youtube-thumbnail-[[${videoId}]]-hq.jpg')"
+              th:data-url="${thumbnailUrl}"
+              th:data-filename="'youtube-thumbnail-' + ${videoId} + '-hq.jpg'"
+              onclick="downloadImage(this.dataset.url, this.dataset.filename)"
               class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
         Download Thumbnail
       </button>
