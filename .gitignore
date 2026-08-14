@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Secrets and local configuration ###
+# Use the YOUTUBE_API_KEY environment variable for the YouTube Data API key.
+.env
+.env.*
+!.env.example
+src/main/resources/application-local.properties
+src/main/resources/*-secret.properties
+secrets.properties
