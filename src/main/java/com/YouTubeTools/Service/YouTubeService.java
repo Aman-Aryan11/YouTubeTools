@@ -1,9 +1,12 @@
 package com.YouTubeTools.Service;
 
+import com.YouTubeTools.DTO.SearchApiResponse;
+import com.YouTubeTools.DTO.SearchItem;
+import com.YouTubeTools.DTO.Snippet;
+import com.YouTubeTools.DTO.VideoApiResponse;
 import com.YouTubeTools.Model.SearchVideo;
 import com.YouTubeTools.Model.Video;
 import com.YouTubeTools.Model.VideoDetails;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -149,58 +152,8 @@ public class YouTubeService {
         return getVideoById(videoId);
     }
 
-    @Data
-    static class SearchApiResponse {
-        List<SearchItem> items;
-    }
 
-    @Data
-    static class SearchItem {
-        Id id;
-    }
 
-    @Data
-    static class Id {
-        String videoId;
-    }
 
-    @Data
-    static class VideoApiResponse {
-        List<VideoItem> items;
-    }
 
-    @Data
-    static class VideoItem {
-        Snippet snippet;
-    }
-
-    @Data
-    static class Snippet {
-        String title;
-        String description;
-        String channelTitle;
-        String publishedAt;
-        List<String> tags;
-        Thumbnails thumbnails;
-    }
-
-    @Data
-    static class Thumbnails {
-        Thumbnail maxres;
-        Thumbnail high;
-        Thumbnail medium;
-        Thumbnail _default;
-
-        String getBestThumbnailUrl() {
-            if(maxres != null) return maxres.url;
-            if(high != null) return high.url;
-            if(medium != null) return medium.url;
-            return _default != null ? _default.url : "";
-        }
-    }
-
-    @Data
-    static class Thumbnail {
-        String url;
-    }
 }
