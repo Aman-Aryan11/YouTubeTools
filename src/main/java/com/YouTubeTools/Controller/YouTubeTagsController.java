@@ -1,6 +1,7 @@
 package com.YouTubeTools.Controller;
 
 import com.YouTubeTools.Model.SearchVideo;
+import com.YouTubeTools.Model.Video;
 import com.YouTubeTools.Service.YouTubeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +10,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/youtube")
@@ -39,8 +43,27 @@ public class YouTubeTagsController {
 
         try {
             SearchVideo result = youTubeService.searchVideos(videoTitle);
-            model.addAttribute("primaryVideo", result.getPrimaryVideo());
-            model.addAttribute("relatedVideos", result.getRelatedVideos());
+            Video primaryVideo = result.getPrimaryVideo();
+            List<Video> relatedVideos = result.getRelatedVideos();
+
+            model.addAttribute("primaryVideo", primaryVideo);
+            model.addAttribute("relatedVideos", relatedVideos);
+
+            if (primaryVideo != null) {
+                model.addAttribute("primaryVideoTagsAsString",
+                        primaryVideo.getTags() == null ? "" :
+                                String.join(", ", primaryVideo.getTags()));
+            }
+
+            if (relatedVideos != null && !relatedVideos.isEmpty()) {
+                String allTags = relatedVideos.stream()
+                        .filter(v -> v.getTags() != null)
+                        .flatMap(v -> v.getTags().stream())
+                        .distinct()
+                        .collect(Collectors.joining(", "));
+                model.addAttribute("allTagsAsString", allTags);
+            }
+
             return "home";
         } catch(Exception e) {
             model.addAttribute("error", e.getMessage());

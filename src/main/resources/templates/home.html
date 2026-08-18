@@ -49,6 +49,9 @@
         color: #10b981;
         border-left: 4px solid #10b981;
     }
+    .copy-btn.is-copied {
+        background: #16a34a !important;
+    }
     .dark .gradient-header {
         border-color: #334155;
     }
@@ -99,8 +102,8 @@
           <span>Primary Video Tags</span>
         </div>
         <button type="button"
-                class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2"
-                th:onclick="'copyTags(\\'' + ${primaryVideo.tagsAsString} + '\\')'">
+                class="copy-btn bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                th:attr="data-copy=${primaryVideoTagsAsString}">
           <i class="bi bi-clipboard2-check"></i> Copy Tags
         </button>
       </div>
@@ -122,8 +125,8 @@
           <span>Related Videos Tags</span>
         </div>
         <button type="button"
-                class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2"
-                th:onclick="'copyTags(\\'' + ${allTagsAsString} + '\\')'">
+                class="copy-btn bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                th:attr="data-copy=${allTagsAsString}">
           <i class="bi bi-clipboard2"></i> Copy All
         </button>
       </div>
@@ -143,20 +146,57 @@
       </div>
     </div>
   </div>
-
-  <div id="copySuccess" class="success hidden rounded-lg p-4 mb-4">Tags copied to clipboard!</div>
 </div>
 
 <script>
-  function copyTags(tags) {
-      navigator.clipboard.writeText(tags)
-          .then(() => {
-              const success = document.getElementById('copySuccess');
-              success.classList.remove('hidden');
-              setTimeout(() => success.classList.add('hidden'), 2000);
-          })
-          .catch(() => alert('Could not copy tags.'));
+  function copyToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+          return navigator.clipboard.writeText(text);
+      }
+      // Fallback for non-secure contexts (HTTP localhost over IP, etc.)
+      return new Promise((resolve, reject) => {
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.setAttribute('readonly', '');
+          textarea.style.position = 'fixed';
+          textarea.style.top = '-1000px';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.select();
+          try {
+              const ok = document.execCommand('copy');
+              document.body.removeChild(textarea);
+              ok ? resolve() : reject(new Error('copy failed'));
+          } catch (e) {
+              document.body.removeChild(textarea);
+              reject(e);
+          }
+      });
   }
+
+  function flashCopied(btn) {
+      if (btn.dataset.busy === '1') return;
+      btn.dataset.busy = '1';
+      btn.dataset.originalHtml = btn.innerHTML;
+      btn.innerHTML = '<i class="bi bi-check2"></i> Copied';
+      btn.classList.add('is-copied');
+      setTimeout(() => {
+          btn.innerHTML = btn.dataset.originalHtml;
+          btn.classList.remove('is-copied');
+          delete btn.dataset.busy;
+      }, 2000);
+  }
+
+  function showCopyError() {
+      alert('Could not copy tags.');
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+          const tags = btn.getAttribute('data-copy') || '';
+          copyToClipboard(tags).then(() => flashCopied(btn)).catch(showCopyError);
+      });
+  });
 </script>
 </body>
 </html>
